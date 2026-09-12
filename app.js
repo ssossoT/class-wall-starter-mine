@@ -1,54 +1,81 @@
 // ===================================================
-// 우리 반 담벼락 - 시작점
-//
-// 메모를 쓰면 올린 순서대로 담벼락에 붙습니다.
-// 지금은 데이터가 아래 배열에만 들어 있어서,
-// 브라우저를 새로고침하면 전부 사라집니다.
+// 우리 반 담벼락 - Firebase Firestore 연동
 // ===================================================
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  query,
+  orderBy,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// --- 메모 목록 ---
-// createdAt 은 메모를 쓴 시각(밀리초)입니다. 이 값으로 순서를 정합니다.
-let memos = [
-  { id: 1, text: "오늘 과학 시간에 한 실험이 재미있었다", createdAt: 1757030400000 },
-  { id: 2, text: "궁금한 점 - 물은 왜 100도에서 끓나요?", createdAt: 1757030500000 },
-  { id: 3, text: "모둠 친구들이 도와줘서 고마웠다", createdAt: 1757030600000 }
-];
+// --- Firebase 설정 ---
+const firebaseConfig = {
+  apiKey: "AIzaSyDT1GF4oO_yE9FRFPzB0uyOib4Ptrlx0rU",
+  authDomain: "test-class-wall-mine-khst.firebaseapp.com",
+  projectId: "test-class-wall-mine-khst",
+  storageBucket: "test-class-wall-mine-khst.firebasestorage.app",
+  messagingSenderId: "14859510948",
+  appId: "1:14859510948:web:14f19388978b7e2ec43231"
+};
 
-let nextId = 4;  // 새 메모에 붙일 번호
+// Firebase 및 Firestore 초기화
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const memosCollection = collection(db, "memos");
+
+// --- 메모 목록 (Firestore 실시간 수신) ---
+let memos = [];
+
+// Firestore의 "memos" 컬렉션을 올린 시각 순서로 실시간 감시합니다.
+const q = query(memosCollection, orderBy("createdAt", "asc"));
+onSnapshot(q, function (snapshot) {
+  memos = snapshot.docs.map(function (docSnap) {
+    const data = docSnap.data();
+    return {
+      id: docSnap.id,
+      text: data.text,
+      createdAt: data.createdAt ? (data.createdAt.toMillis ? data.createdAt.toMillis() : data.createdAt) : Date.now()
+    };
+  });
+  render();
+});
 
 
 // ===================================================
-// 데이터를 다루는 함수 세 개
-// 백엔드 1 시간에 이 세 개가 Firestore를 쓰는 코드로 바뀝니다.
+// 데이터를 다루는 함수 세 개 (Firestore 사용)
 // ===================================================
 
 // 메모를 읽어 옵니다.
-// 백엔드 1: 여기가 Firestore에서 가져오는 코드로 바뀝니다.
-//           순서는 orderBy("createdAt") 으로 맞춥니다.
 function loadMemos() {
-  return memos.slice().sort(function (a, b) {
-    return a.createdAt - b.createdAt;
-  });
+  return memos;
 }
 
 // 메모를 새로 씁니다.
-// 백엔드 2: 여기에 "누가 썼는지"(uid)를 함께 저장하게 됩니다.
-function addMemo(text) {
-  memos.push({
-    id: nextId,
-    text: text,
-    createdAt: Date.now()
-  });
-  nextId = nextId + 1;
+async function addMemo(text) {
+  try {
+    await addDoc(memosCollection, {
+      text: text,
+      createdAt: serverTimestamp()
+    });
+  } catch (error) {
+    console.error("메모 작성 오류:", error);
+  }
 }
 
 // 메모를 지웁니다.
-// 백엔드 2: 지금은 누구든 남의 메모를 지울 수 있습니다. 이걸 막는 것이 과제입니다.
-function deleteMemo(id) {
-  memos = memos.filter(function (memo) {
-    return memo.id !== id;
-  });
+async function deleteMemo(id) {
+  try {
+    await deleteDoc(doc(db, "memos", id));
+  } catch (error) {
+    console.error("메모 삭제 오류:", error);
+  }
 }
 
 
