@@ -37,7 +37,7 @@ const firebaseConfig = {
 // 교사 권한을 줄 Firebase Auth UID 목록입니다. 
 // 여기에 교사의 UID 문자열을 추가하면 교사(teacher) 권한이 부여됩니다.
 const TEACHER_UIDS = [
-  // 예시: "aBcDeFgHiJkLmNoPqRsTuVwXyZ12"
+  "dcZoXfT4u6fyYlKfvKSCUIDJadw2"
 ];
 
 // Firebase 및 Firestore, Auth 초기화
