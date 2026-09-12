@@ -57,15 +57,23 @@ function loadMemos() {
   return memos;
 }
 
-// 메모를 새로 씁니다.
+// 메모를 새로 씁니다. (5글자 이상일 때만 Firestore에 저장)
 async function addMemo(text) {
+  const trimmed = text ? text.trim() : "";
+  if (trimmed.length < 5) {
+    alert("메모는 5글자 이상 입력해 주세요.");
+    return false;
+  }
+
   try {
     await addDoc(memosCollection, {
-      text: text,
+      text: trimmed,
       createdAt: serverTimestamp()
     });
+    return true;
   } catch (error) {
     console.error("메모 작성 오류:", error);
+    return false;
   }
 }
 
@@ -120,16 +128,17 @@ function makeMemo(memo) {
 
 const input = document.getElementById("input");
 
-input.onkeydown = function (e) {
+input.onkeydown = async function (e) {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
 
     const text = input.value.trim();
     if (text === "") return;
 
-    addMemo(text);
-    input.value = "";
-    render();
+    const success = await addMemo(text);
+    if (success) {
+      input.value = "";
+    }
   }
 };
 
