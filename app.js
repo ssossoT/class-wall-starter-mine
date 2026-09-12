@@ -162,10 +162,15 @@ async function generateAiComment(memoId, memoText, btnElement) {
       body: JSON.stringify({ memoText: memoText })
     });
 
-    const data = await response.json();
+    let data = {};
+    try {
+      data = await response.json();
+    } catch (e) {
+      console.error("JSON 파싱 에러:", e);
+    }
 
     if (!response.ok) {
-      alert(`[AI 오류] ${data.error || 'Gemini API 호출에 실패했습니다.'}`);
+      alert(`[AI 피드백 오류] ${data.error || 'Vercel에 GEMINI_API_KEY 환경변수가 등록되지 않았거나 API 호출에 실패했습니다.'}`);
       if (btnElement) {
         btnElement.disabled = false;
         btnElement.textContent = "🤖 AI 피드백";
@@ -181,7 +186,7 @@ async function generateAiComment(memoId, memoText, btnElement) {
     }
   } catch (error) {
     console.error("AI 피드백 요청 오류:", error);
-    alert("로컬 서버 환경이거나 /api/gemini 주소를 찾을 수 없습니다. Vercel 배포 후 GEMINI_API_KEY 설정이 필요합니다.");
+    alert("API 요청에 실패했습니다. Vercel 대시보드(Settings ➡️ Environment Variables)에서 GEMINI_API_KEY 등록 여부를 확인해 주세요!");
     if (btnElement) {
       btnElement.disabled = false;
       btnElement.textContent = "🤖 AI 피드백";
