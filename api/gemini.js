@@ -1,7 +1,7 @@
 // ===================================================
 // Gemini API 호출을 위한 Vercel 서버리스 함수
 // 
-// Gemini 모델 gemini-2.5-flash 모델을 사용합니다.
+// Gemini 모델 gemini-3.6-flash 모델을 사용합니다.
 // Vercel 환경 변수 GEMINI_API_KEY를 등록해야 정상 작동합니다.
 // ===================================================
 
@@ -42,9 +42,9 @@ export default async function handler(req, res) {
     // 개인식별 정보(이름, UID 등) 없이 순수 메모 내용만 프롬프트에 전달합니다.
     const prompt = `당신은 따뜻하고 격려를 잘하는 선생님입니다. 학생이 학급 담벼락에 적은 글을 보고 긍정적이고 응원하는 짧은 피드백 코멘트를 1~2문장으로 남겨주세요.\n\n학생 게시글: "${memoText}"`;
 
-    // Gemini 모델: gemini-2.5-flash 호출
+    // Gemini 모델: gemini-3.6-flash 호출
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: {
